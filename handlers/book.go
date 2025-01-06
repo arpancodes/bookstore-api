@@ -9,10 +9,11 @@ import (
 
 	"github.com/arpancodes/bookstore-api/models"
 	"github.com/arpancodes/bookstore-api/storage"
+	"github.com/arpancodes/bookstore-api/utils"
 )
 
 type BookHandler struct {
-	Storage *storage.InMemoryStorage
+	Storage models.Storage
 }
 
 func NewBookHandler(storage *storage.InMemoryStorage) *BookHandler {
@@ -22,7 +23,7 @@ func NewBookHandler(storage *storage.InMemoryStorage) *BookHandler {
 func (h *BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	var newBook models.Book
 	if err := json.NewDecoder(r.Body).Decode(&newBook); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		utils.WriteJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
@@ -41,19 +42,19 @@ func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteJSONError(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
 	var updatedBook models.Book
 	if err := json.NewDecoder(r.Body).Decode(&updatedBook); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		utils.WriteJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
 	updatedBookPtr, success := h.Storage.UpdateBook(id, updatedBook)
 	if !success {
-		http.Error(w, "Book not found", http.StatusNotFound)
+		utils.WriteJSONError(w, "Book not found", http.StatusNotFound)
 		return
 	}
 
@@ -64,12 +65,12 @@ func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteJSONError(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
 	if !h.Storage.DeleteBook(id) {
-		http.Error(w, "Book not found", http.StatusNotFound)
+		utils.WriteJSONError(w, "Book not found", http.StatusNotFound)
 	}
 
 	w.WriteHeader(http.StatusOK)

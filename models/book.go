@@ -7,3 +7,10 @@ type Book struct {
 	Author string  `json:"author"`
 	Price  float64 `json:"price"`
 }
+
+type Storage interface {
+	AddBook(book Book) Book
+	GetBooks() []Book
+	UpdateBook(id int, book Book) (*Book, bool)
+	DeleteBook(id int) bool
+}
